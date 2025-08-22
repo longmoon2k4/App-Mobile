@@ -3,9 +3,9 @@ import { Stack } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
-    VNI_THUPHAP: require('../assets/fonts/vni_thuphap.ttf'),
-  });
+   const [fontsLoaded] = useFonts({
+     SVN: require('../assets/fonts/svn.otf'),
+   });
 
   if (!fontsLoaded) {
     return <View style={{flex:1,justifyContent:'center',alignItems:'center'}}><ActivityIndicator size="large" color="#a67c52" /></View>;

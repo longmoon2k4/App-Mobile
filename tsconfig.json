@@ -9,9 +9,17 @@
     }
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    ".expo/types/**/*.ts",
+    "app",
+    "components",
+    "constants",
+    "hooks",
+    "scripts",
     "expo-env.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/__mocks__/*",
+    "**/__tests__/*",
+    "**/__rsc_tests__/*"
   ]
 }
