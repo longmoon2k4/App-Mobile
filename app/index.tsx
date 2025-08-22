@@ -1,10 +1,17 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { ResizeMode, Video } from 'expo-av';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Animated, Dimensions, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-// Thêm hook cho progress bar
-import { useRef } from 'react';
+
+export default function HomeScreen() {
+  const { width } = Dimensions.get('window');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [showLogin, setShowLogin] = useState(false);
   const progress = useRef(new Animated.Value(0)).current;
+  const [percentValue, setPercentValue] = useState(0);
+  const loginOpacity = useRef(new Animated.Value(0)).current;
+
   // Animate progress bar khi loading
   useEffect(() => {
     Animated.timing(progress, {
@@ -12,17 +19,12 @@ import { useRef } from 'react';
       duration: 2000,
       useNativeDriver: false,
     }).start();
-  }, []);
-
-export default function HomeScreen() {
-  const { width } = Dimensions.get('window');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 2000);
-    return () => clearTimeout(timer);
+    const id = progress.addListener(({ value }) => {
+      setPercentValue(Math.round(value * 100));
+    });
+    return () => {
+      progress.removeListener(id);
+    };
   }, []);
 
   const handleLogin = () => {
@@ -37,24 +39,40 @@ export default function HomeScreen() {
     }
   };
 
-  if (loading) {
+  if (!showLogin) {
     const widthInterpolate = progress.interpolate({
       inputRange: [0, 1],
       outputRange: ['0%', '80%'],
     });
+    const handleStart = () => {
+      Animated.timing(loginOpacity, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }).start(() => setShowLogin(true));
+    };
     return (
       <View style={styles.loadingContainer}>
         <Text style={styles.loadingText}>HÀNH TRÌNH TU TIÊN</Text>
-        <ActivityIndicator size="large" color="#ffcc66" style={{ marginVertical: 24 }} />
-        <View style={styles.progressBarBg}>
-          <Animated.View style={[styles.progressBar, { width: widthInterpolate }]} />
-        </View>
+        {percentValue < 100 ? (
+          <>
+            <ActivityIndicator size="large" color="#ffcc66" style={{ marginVertical: 24 }} />
+            <View style={styles.progressBarBg}>
+              <Animated.View style={[styles.progressBar, { width: widthInterpolate }]} />
+            </View>
+            <Text style={styles.percentText}>{percentValue}%</Text>
+          </>
+        ) : (
+          <TouchableOpacity style={styles.startBtn} onPress={handleStart}>
+            <Text style={styles.startBtnText}>BẮT ĐẦU</Text>
+          </TouchableOpacity>
+        )}
       </View>
     );
   }
 
   return (
-    <View style={styles.background}>
+    <Animated.View style={[styles.background, { opacity: loginOpacity }]}>
       <Video
         source={require('../assets/images/bgr.mp4')}
         style={[StyleSheet.absoluteFill, { width: '100%', height: '100%' }]}
@@ -96,10 +114,37 @@ export default function HomeScreen() {
           <Text style={styles.registerText}>REGISTER</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </Animated.View>
   );
 }
+
 const styles = StyleSheet.create({
+  startBtn: {
+    marginTop: 32,
+    backgroundColor: '#ffcc66',
+    borderRadius: 18,
+    paddingVertical: 14,
+    paddingHorizontal: 48,
+    alignItems: 'center',
+    shadowColor: '#ffcc66',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  startBtnText: {
+    color: '#1e140a',
+    fontSize: 22,
+    fontWeight: 'bold',
+    letterSpacing: 2,
+  },
+  percentText: {
+    color: '#ffcc66',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 8,
+    letterSpacing: 1,
+  },
   progressBarBg: {
     width: '80%',
     height: 10,
@@ -123,7 +168,7 @@ const styles = StyleSheet.create({
     color: '#ffcc66',
     fontSize: 28,
     fontWeight: 'bold',
-    fontFamily: 'SVN',
+    fontFamily: 'vn',
     letterSpacing: 2,
   },
   registerBtn: {
@@ -140,7 +185,7 @@ const styles = StyleSheet.create({
     color: '#ffcc66',
     fontSize: 18,
     fontWeight: 'bold',
-    fontFamily: 'SVN',
+    fontFamily: 'vn',
     letterSpacing: 1,
   },
   background: {
@@ -169,14 +214,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#f1e9e9ff',
     marginBottom: 20,
-    fontFamily: 'SVN',
+    fontFamily: 'vn',
   },
   input: {
     flex: 1,
     height: 48,
     color: '#fff',
     fontSize: 17,
-    fontFamily: 'SVN',
+    fontFamily: 'vn',
     backgroundColor: 'transparent',
     paddingHorizontal: 8,
   },
@@ -185,7 +230,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 18,
-    fontFamily: 'SVN',
+    fontFamily: 'vn',
     textShadowColor: '#000',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
@@ -222,7 +267,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 20,
     fontWeight: 'bold',
-    fontFamily: 'SVN',
+    fontFamily: 'vn',
     letterSpacing: 1,
     textShadowColor: '#a60000',
     textShadowOffset: { width: 1, height: 1 },

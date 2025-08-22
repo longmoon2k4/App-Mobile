@@ -5,6 +5,8 @@ import { ActivityIndicator, View } from 'react-native';
 export default function RootLayout() {
    const [fontsLoaded] = useFonts({
      SVN: require('../assets/fonts/svn.otf'),
+     vn: require('../assets/fonts/vn.ttf'),
+     tp: require('../assets/fonts/tp.ttf'),
    });
 
   if (!fontsLoaded) {
