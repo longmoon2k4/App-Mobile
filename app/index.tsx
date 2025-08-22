@@ -1,12 +1,29 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { ResizeMode, Video } from 'expo-av';
-import React, { useState } from 'react';
-import { Alert, Dimensions, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Animated, Dimensions, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+// Thêm hook cho progress bar
+import { useRef } from 'react';
+  const progress = useRef(new Animated.Value(0)).current;
+  // Animate progress bar khi loading
+  useEffect(() => {
+    Animated.timing(progress, {
+      toValue: 1,
+      duration: 2000,
+      useNativeDriver: false,
+    }).start();
+  }, []);
 
 export default function HomeScreen() {
   const { width } = Dimensions.get('window');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleLogin = () => {
     if (username === '' || password === '') {
@@ -19,6 +36,22 @@ export default function HomeScreen() {
       Alert.alert('Thất bại', 'Sai tài khoản hoặc mật khẩu!');
     }
   };
+
+  if (loading) {
+    const widthInterpolate = progress.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['0%', '80%'],
+    });
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>HÀNH TRÌNH TU TIÊN</Text>
+        <ActivityIndicator size="large" color="#ffcc66" style={{ marginVertical: 24 }} />
+        <View style={styles.progressBarBg}>
+          <Animated.View style={[styles.progressBar, { width: widthInterpolate }]} />
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.background}>
@@ -33,7 +66,7 @@ export default function HomeScreen() {
       <View style={styles.overlay} />
       <View style={styles.loginBox}>
         <Text style={styles.title}>HÀNH TRÌNH TU TIÊN</Text>
-        <Text style={styles.subtitle}>目 11.1K 傳大暢</Text>
+        <Text style={styles.subtitle}>TRUYỀN TỐNG TRẬN</Text>
         <View style={styles.inputWrapper}>
           <MaterialCommunityIcons name="account" size={22} color="#fff" style={styles.inputIcon} />
           <TextInput
@@ -66,8 +99,33 @@ export default function HomeScreen() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
+  progressBarBg: {
+    width: '80%',
+    height: 10,
+    backgroundColor: '#3a2a1a',
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginTop: 8,
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: '#ffcc66',
+    borderRadius: 8,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1e140a',
+  },
+  loadingText: {
+    color: '#ffcc66',
+    fontSize: 28,
+    fontWeight: 'bold',
+    fontFamily: 'SVN',
+    letterSpacing: 2,
+  },
   registerBtn: {
     marginTop: 16,
     width: '80%',
@@ -109,7 +167,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#f1e9e9ff',
     marginBottom: 20,
     fontFamily: 'SVN',
   },
@@ -170,5 +228,4 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
-  // Đã loại bỏ các khai báo lặp lại, chỉ giữ lại 1 khai báo cho mỗi key
 });
